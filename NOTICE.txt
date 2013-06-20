@@ -1,0 +1,7 @@
+Apache 2.0 license, (c) 2013 Roland Ewald
+
+The software is based on other open-source projects:
+
+- Scala (http://scala-lang.org)
+
+- slf4s (https://github.com/weiglewilczek/slf4s)
