@@ -1,0 +1,18 @@
+<#-- Basic Scaladoc Template for LaTeX -->
+\documentclass{report}
+
+\usepackage[colorlinks=true]{hyperref}
+\usepackage{listings}
+\lstset{breaklines=true, stringstyle=\ttfamily,basicstyle=\tiny,language=,}
+
+
+\title{Scaladocs}
+\date{${date}}
+
+\begin{document}
+
+\maketitle
+
+\chapter{Overview}
+
+\end{document}

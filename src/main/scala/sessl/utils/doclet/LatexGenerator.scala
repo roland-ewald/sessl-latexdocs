@@ -18,6 +18,7 @@
 package sessl.utils.doclet
 
 import java.io.File
+import java.io.FileWriter
 
 import scala.Option.option2Iterable
 import scala.tools.nsc.doc.base.comment.Block
@@ -49,6 +50,10 @@ import scala.tools.nsc.doc.model.DocTemplateEntity
 
 import com.weiglewilczek.slf4s.Logging
 
+import freemarker.template.Configuration
+import freemarker.template.DefaultObjectWrapper
+import freemarker.template.TemplateException
+
 /**
  * A simple Scaladoc generator for LaTeX.
  *
@@ -64,6 +69,31 @@ class LatexGenerator extends Generator with Universer with Indexer with Logging 
   override def generateImpl() {
     logger.info(s"Scaladoc LaTeX Generator\nTarget: ${targetDir}")
     processEntity(universe.rootPackage, _.isClass)
+    testTemplateEngine()
+  }
+
+  def testTemplateEngine() {
+
+    val templateDir = "report_template"
+    val cfg = new Configuration()
+    cfg.setClassForTemplateLoading(classOf[LatexGenerator], "/")
+    cfg.setObjectWrapper(new DefaultObjectWrapper());
+
+    val dataMap = Map[String, Any]()
+    println(new File("src/main/resources/basic_template.tex.fm").getAbsolutePath())
+    val basicTemplate = cfg.getTemplate("basic_template.tex.fm");
+
+    var out: FileWriter = null
+    try {
+      out = new FileWriter(targetDir.getAbsolutePath() +
+        File.separatorChar + "scaladocs.tex")
+      basicTemplate.process(dataMap, out)
+    } catch {
+      case ex: TemplateException => logger.error("Error processing template file.", ex)
+    } finally {
+      out.close()
+    }
+
   }
 
   /**
