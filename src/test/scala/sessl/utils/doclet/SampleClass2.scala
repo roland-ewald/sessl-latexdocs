@@ -18,40 +18,30 @@
 package sessl.utils.doclet
 
 /**
- * This is a __sample__ class for [[LatexGenerator]].
+ * This is a __summary__ for [[SampleClass2]].
  *
- * It allows to check whether notation for ''italic'', `typewriter`, '''bold''', __underlined__, ^super^, and ,,sub,, can be used.
- *
- * =A major point=
- *
- * {{{
- * scala > println("hello world!")
- * scala > 1+1
- * scala > ...
- * }}}
- *
- * ==A not so major point==
- *
- * ===A paragraph===
- *
- * ====A paragraph, too====
+ * =Documentation=
  *
  * Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut
  * labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi
  * ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat
  * nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
  *
- * @author Roland Ewald
  */
-class SampleClass {
-
-  /** This explains the `testValue`. */
-  val testValue = 42
+class SampleClass2 {
 
   /**
    * This should be the '''summary'''.
    * @param x this explains a parameter
    */
-  def anotherSample(x: Int) = x
+  def f(x: Int) = x
+
+  /**
+   * This should be the '''summary'''.
+   * @tparam G a type parameter
+   * @param x this explains a parameter
+   * @example fg(1)
+   */
+  def fg[G](x: Int) = x
 
 }
