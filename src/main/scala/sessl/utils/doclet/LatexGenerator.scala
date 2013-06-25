@@ -19,6 +19,7 @@ package sessl.utils.doclet
 
 import java.io.File
 import java.io.FileWriter
+import java.util.Date
 import scala.Option.option2Iterable
 import scala.tools.nsc.doc.base.comment.Block
 import scala.tools.nsc.doc.base.comment.Bold
@@ -49,9 +50,10 @@ import scala.tools.nsc.doc.model.DocTemplateEntity
 import com.weiglewilczek.slf4s.Logging
 import freemarker.template.Configuration
 import freemarker.template.DefaultObjectWrapper
-import freemarker.template.TemplateException
-import java.util.Date
 import freemarker.template.Template
+import freemarker.template.TemplateException
+import java.io.PrintWriter
+import scala.tools.nsc.doc.model.Def
 
 /**
  * A simple Scaladoc generator for LaTeX.
@@ -61,86 +63,35 @@ import freemarker.template.Template
  *
  * @author Roland Ewald
  */
-class LatexGenerator extends Generator with Universer with Indexer with Logging {
+class LatexGenerator extends FreemarkerGenerator {
 
-  type QualifiedName = String
+  type MethodList = java.util.List[DefWrapper]
 
-  type ElementDescription = (QualifiedName, String)
+  override def defaultTemplateFile = "basic_template.tex.fm"
 
-  type IncludeFilter = DocTemplateEntity => Boolean
+  override def defaultTargetFile = "scaladocs.tex"
 
-  val influcdeAllTypes: IncludeFilter = _.isType
+  override def wrap(d: DocTemplateEntity) = LatexWrapper(d)
 
-  val templateDirectory = "/"
-
-  val templateFile = "basic_template.tex.fm"
-
-  val targetFile = "scaladocs.tex"
-
-  def targetDir: File = new File(universe.settings.outdir.value)
-
-  override def generateImpl() {
-    logger.info(s"Scaladoc LaTeX Generator\nTarget: ${targetDir}")
-    val eDescs = generateDescriptions(universe.rootPackage, _.isClass)
-    fillTemplate(createTemplateData(eDescs))
+  case class LatexWrapper(doc: DocTemplateEntity) {
+    def comment: String = convertComment(doc.comment)
+    def summary: String = convertSummary(doc.comment)
+    def allMethods: MethodList = retrieveMethods(_ => true)
+    def methods: MethodList = retrieveMethods(d => d.inDefinitionTemplates.head == d.inTemplate)
+    def retrieveMethods(f: Def => Boolean): MethodList = toJavaList(doc.methods.filter(f).map(DefWrapper(_)))
   }
 
-  def createTemplateData(e: List[ElementDescription]): Map[String, Any] = {
-    Map[String, Any]("date" -> new Date().toString)
+  case class DefWrapper(d: Def) {
+    def name: String = d.name
+    def comment: String = convertComment(d.comment)
+    def summary: String = convertSummary(d.comment)
   }
 
-  def fillTemplate(data: Map[String, Any]) {
-    var out: FileWriter = null
-    try {
-      out = new FileWriter(targetDir.getAbsolutePath() +
-        File.separatorChar + targetFile)
-      configureTemplate().process(toJavaMap(data), out)
-    } catch {
-      case ex: TemplateException => logger.error("Error processing template file.", ex)
-    } finally {
-      out.close()
-    }
-  }
+  def convertSummary(co: Option[Comment]): String =
+    (for (c <- co; sum <- c.body.summary) yield convertInline(sum)).getOrElse("")
 
-  def toJavaMap(m: Map[String, Any]): java.util.HashMap[String, Any] = {
-    val jm = new java.util.HashMap[String, Any]()
-    m.foreach(x => jm.put(x._1, x._2))
-    jm
-  }
-
-  /**
-   * Walk through the entity tree.
-   *  @param dte the entity
-   *  @param include method to specify which entities to include (default is all)
-   */
-  def generateDescriptions(dte: DocTemplateEntity, include: IncludeFilter = influcdeAllTypes): List[ElementDescription] = {
-    val elems = dte.templates collect { case x: DocTemplateEntity => x } flatMap (generateDescriptions(_, include))
-    if (include(dte))
-      toLatex(dte) :: elems
-    else
-      elems
-  }
-
-  /** Convert type description to LaTeX. */
-  def toLatex(dte: DocTemplateEntity): ElementDescription = {
-    logger.info(s"Generating description of ${dte.qualifiedName}")
-    val description =
-      "\\section{" + dte.name + "}\n\\label{scaladoc:" + dte.qualifiedName + "}" +
-        dte.comment.map(convertComment).mkString
-    //TODO: finish this...
-    (dte.qualifiedName, description)
-  }
-
-  def configureTemplate(): Template = {
-    val cfg = new Configuration()
-    cfg.setClassForTemplateLoading(classOf[LatexGenerator], templateDirectory)
-    cfg.setObjectWrapper(new DefaultObjectWrapper())
-    cfg.getTemplate(templateFile)
-  }
-
-  def convertComment(c: Comment): String = {
-    c.body.blocks.map(convertBlock).mkString
-  }
+  def convertComment(c: Option[Comment]): String =
+    c.map(_.body.blocks.map(convertBlock).mkString).getOrElse("")
 
   def convertInline(i: Inline): String = i match {
     case c: Chain => c.items.map(convertInline).mkString("")

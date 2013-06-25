@@ -1,18 +1,37 @@
-<#-- Basic Scaladoc Template for LaTeX -->
-\documentclass{report}
+<#-- Template for a Scaladoc summary in LaTeX -->
+\documentclass{article}
 
 \usepackage[colorlinks=true]{hyperref}
 \usepackage{listings}
+\usepackage{tabularx}
+\usepackage{fixltx2e}
 \lstset{breaklines=true, stringstyle=\ttfamily,basicstyle=\tiny,language=,}
 
 
 \title{Scaladocs}
+\author{}
 \date{${date}}
 
 \begin{document}
 
 \maketitle
 
-\chapter{Overview}
+<#list entities as entity>
+	
+\section{${entity.doc().qualifiedName()}}
+\label{scaladoc:${entity.doc().qualifiedName()}}
+	
+${entity.comment()}
+
+\subsection{Methods}
+\label{scaladoc:${entity.doc().qualifiedName()}:methods}
+
+	\begin{tabularx}{\textwidth}{ |X|X| }
+    \hline Name & Description \\\hline	
+	<#list entity.methods() as method>
+	${method.name()} & ${method.summary()} \\\hline
+	</#list>
+	\end{tabularx}
+</#list>
 
 \end{document}
