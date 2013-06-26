@@ -18,7 +18,7 @@
 
 <#list entities as entity>
 	
-\section{${entity.doc().qualifiedName()}}
+\section{${entity.name()}}
 \label{scaladoc:${entity.doc().qualifiedName()}}
 	
 ${entity.comment()}

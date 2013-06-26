@@ -54,7 +54,7 @@ import freemarker.template.Template
 import freemarker.template.TemplateException
 import java.io.PrintWriter
 import scala.tools.nsc.doc.model.Def
-
+import LatexStringConverter.convert
 /**
  * A simple Scaladoc generator for LaTeX.
  *
@@ -74,6 +74,7 @@ class LatexGenerator extends FreemarkerGenerator {
   override def wrap(d: DocTemplateEntity) = LatexWrapper(d)
 
   case class LatexWrapper(doc: DocTemplateEntity) {
+    def name: String = convert(doc.qualifiedName)
     def comment: String = convertComment(doc.comment)
     def summary: String = convertSummary(doc.comment)
     def allMethods: MethodList = retrieveMethods(_ => true)
@@ -82,7 +83,7 @@ class LatexGenerator extends FreemarkerGenerator {
   }
 
   case class DefWrapper(d: Def) {
-    def name: String = d.name
+    def name: String = convert(d.name)
     def comment: String = convertComment(d.comment)
     def summary: String = convertSummary(d.comment)
   }
@@ -95,7 +96,7 @@ class LatexGenerator extends FreemarkerGenerator {
 
   def convertInline(i: Inline): String = i match {
     case c: Chain => c.items.map(convertInline).mkString("")
-    case t: Text => t.text
+    case t: Text => convert(t.text)
     case u: Underline => s"\\underline{${convertInline(u.text)}}"
     case b: Bold => s"\\textbf{${convertInline(b.text)}}"
     case i: Italic => s"\\emph{${convertInline(i.text)}}"
@@ -128,6 +129,6 @@ class LatexGenerator extends FreemarkerGenerator {
 
   def env(name: String, content: String) = s"\\begin{${name}}\n${content}\n\\end{${name}}\n"
 
-  def item(content: String) = s"\n\\item${content}\n"
+  def item(content: String) = s"\n\\item ${content}\n"
 
 }
