@@ -18,18 +18,29 @@ object LatexStringConverter {
     "\\" -> "textbackslash",
     "§" -> "S")
 
-  /** Replacement map. */
-  val replacements = (escapeSymbols.map(x => (x, x)).toMap ++ replaceSymbols).map(x => (x._1, """\\\""" + x._2))
+  /** Character replacement map. */
+  val charReplacements = (escapeSymbols.map(x => (x, x)).toMap ++ replaceSymbols).map(x => (x._1, """\\\""" + x._2))
 
-  /** The regular expression to match. */
-  val regexp = "[" + (escapeSymbols ++ replaceSymbols.keys) + "]"
+  /** The regular expression for character conversion. */
+  val specialCharConversion = ("[" + (escapeSymbols ++ replaceSymbols.keys) + "]").r
+
+  /** The regular expression for CamelCase words.*/
+  val camelCase = """([a-z])([A-Z])""".r
 
   /**
    * Converts string to LaTeX-friendly string (special characters are escaped etc.).
    *  @param s string the string to be converted
    */
-  def convert(s: String): String = regexp.r.replaceAllIn(s, {
-    m => replacements.getOrElse(m.group(0), m.group(0))
+  def convertSpecialChars(s: String): String = specialCharConversion.replaceAllIn(s, {
+    m => charReplacements.getOrElse(m.group(0), m.group(0))
+  })
+
+  /**
+   * Adds Latex markers for hyphenation ('\-').
+   *  @param s method or class name
+   */
+  def camelCaseHyphenation(s: String): String = camelCase.replaceAllIn(s, {
+    m => m.group(1) + """\\-""" + m.group(2)
   })
 
 }

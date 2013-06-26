@@ -5,6 +5,8 @@
 \usepackage{listings}
 \usepackage{tabularx}
 \usepackage{fixltx2e}
+\usepackage[a4paper]{geometry}
+\usepackage[utf8]{inputenc}
 \lstset{breaklines=true, stringstyle=\ttfamily,basicstyle=\tiny,language=,}
 
 
@@ -26,8 +28,8 @@ ${entity.comment()}
 \subsection{Methods}
 \label{scaladoc:${entity.doc().qualifiedName()}:methods}
 
-	\begin{tabularx}{\textwidth}{ |X|X| }
-    \hline Name & Description \\\hline	
+	\begin{tabularx}{\textwidth}{ |>{\hsize=.6\hsize}X|>{\hsize=1.4\hsize}X| }
+    \hline \textbf{Name} & \textbf{Description} \\\hline
 	<#list entity.methods() as method>
 	${method.name()} & ${method.summary()} \\\hline
 	</#list>
