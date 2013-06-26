@@ -25,6 +25,34 @@
 	
 ${entity.comment()}
 
+
+		<#if entity.hasValueParams()>
+			Parameters:
+			\begin{itemize}
+			<#list entity.valueParams() as param>
+			 \item \textbf{${param.name()}} : ${param.summary()} 
+			</#list>
+			\end{itemize}
+		</#if>
+		
+		<#if entity.hasTypeParams()>
+			Type Parameters:
+			\begin{itemize}
+			<#list entity.typeParams() as param>
+			 \item \textbf{${param.name()}} : ${param.summary()} 
+			</#list>
+			\end{itemize}
+		</#if>
+		
+		<#if entity.hasExamples()>
+			Example usage:
+			<#list entity.examples() as example>
+			${example.text()}  
+						
+			</#list>
+		</#if>
+
+
 \subsection{Methods}
 \label{scaladoc:${entity.doc().qualifiedName()}:methods}
 
@@ -50,14 +78,12 @@ ${entity.comment()}
 			\end{itemize}
 		</#if>
 		
-		<#if method.hasTypeParams()>
+		<#if method.hasExamples()>
 			Example usage:
-			\begin{itemize}
 			<#list method.examples() as example>
 			${example.text()}  
 			
 			</#list>
-			\end{itemize}
 		</#if>		
 	\\\hline
 	</#list>
