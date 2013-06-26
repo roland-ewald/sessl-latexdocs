@@ -29,6 +29,10 @@ class TestLatexStringConverter extends FunSpec {
       it("leaves other input alone") {
         assert(convertSpecialChars("test string") === "test string")
       }
+
+      it("deals correctly with cases like '<T>'") {
+        assert(convertSpecialChars("<T") === """\textless T""")
+      }
     }
 
     describe("hyphenation") {
@@ -40,6 +44,9 @@ class TestLatexStringConverter extends FunSpec {
 
       it("works for camel case") {
         assert(camelCaseHyphenation("myMethodName") === """my\-Method\-Name""")
+      }
+
+      it("leaves abbreviations alone") {
         assert(camelCaseHyphenation("ABCConjectureSolution") === """ABCConjecture\-Solution""")
       }
     }

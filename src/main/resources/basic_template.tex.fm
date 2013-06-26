@@ -31,7 +31,35 @@ ${entity.comment()}
 	\begin{tabularx}{\textwidth}{ |>{\hsize=.6\hsize}X|>{\hsize=1.4\hsize}X| }
     \hline \textbf{Name} & \textbf{Description} \\\hline
 	<#list entity.methods() as method>
-	${method.name()} & ${method.summary()} \\\hline
+	${method.name()} & ${method.comment()} 	
+		<#if method.hasValueParams()>
+			Parameters:
+			\begin{itemize}
+			<#list method.valueParams() as param>
+			 \item \textbf{${param.name()}} : ${param.summary()} 
+			</#list>
+			\end{itemize}
+		</#if>
+		
+		<#if method.hasTypeParams()>
+			Type Parameters:
+			\begin{itemize}
+			<#list method.typeParams() as param>
+			 \item \textbf{${param.name()}} : ${param.summary()} 
+			</#list>
+			\end{itemize}
+		</#if>
+		
+		<#if method.hasTypeParams()>
+			Example usage:
+			\begin{itemize}
+			<#list method.examples() as example>
+			${example.text()}  
+			
+			</#list>
+			\end{itemize}
+		</#if>		
+	\\\hline
 	</#list>
 	\end{tabularx}
 </#list>

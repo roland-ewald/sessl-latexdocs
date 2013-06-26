@@ -56,6 +56,7 @@ import java.io.PrintWriter
 import scala.tools.nsc.doc.model.Def
 import LatexStringConverter.convertSpecialChars
 import LatexStringConverter.camelCaseHyphenation
+import scala.tools.nsc.doc.base.comment.Body
 
 /**
  * A simple Scaladoc generator for LaTeX.
@@ -75,26 +76,56 @@ class LatexGenerator extends FreemarkerGenerator {
 
   override def wrap(d: DocTemplateEntity) = LatexWrapper(d)
 
-  case class LatexWrapper(doc: DocTemplateEntity) {
-    def name: String = convertSpecialChars(doc.qualifiedName)
-    def comment: String = convertComment(doc.comment)
-    def summary: String = convertSummary(doc.comment)
-    def allMethods: MethodList = retrieveMethods(_ => true)
-    def methods: MethodList = retrieveMethods(d => d.inDefinitionTemplates.head == d.inTemplate)
-    def retrieveMethods(f: Def => Boolean): MethodList = toJavaList(doc.methods.filter(f).map(DefWrapper(_)))
+  trait CommentedEntity {
+
+    def comm: Option[Comment]
+
+    def comment: String = convertComment(comm)
+    def summary: String = convertSummary(comm)
+
+    def examples = listFromComment(comm)(_.example.map(ExampleWrapper(_)))
+    def typeParams = listFromComment(comm)(_.typeParams.map(x => ParamWrapper(x._1, x._2)))
+    def valueParams = listFromComment(comm)(_.valueParams.map(x => ParamWrapper(x._1, x._2)))
+
+    def hasExamples = !examples.isEmpty
+    def hasTypeParams = !typeParams.isEmpty
+    def hasValueParams = !valueParams.isEmpty
+
+    private def listFromComment[X](c: Option[Comment])(f: Comment => Iterable[X]): java.util.List[X] =
+      toJavaList(c.map(f).getOrElse(Nil))
   }
 
-  case class DefWrapper(d: Def) {
+  case class LatexWrapper(doc: DocTemplateEntity) extends CommentedEntity {
+    def comm = doc.comment
+    def name: String = convertSpecialChars(doc.qualifiedName)
+    def allMethods: MethodList = retrieveMethods(_ => true)
+    def methods: MethodList = retrieveMethods(d => d.inDefinitionTemplates.head == d.inTemplate || d.isConstructor)
+    private def retrieveMethods(f: Def => Boolean): MethodList = toJavaList(doc.methods.filter(f).map(DefWrapper(_)))
+  }
+
+  case class DefWrapper(d: Def) extends CommentedEntity {
+    def comm = d.comment
     def name: String = camelCaseHyphenation(convertSpecialChars(d.name))
-    def comment: String = convertComment(d.comment)
-    def summary: String = convertSummary(d.comment)
+  }
+
+  case class ExampleWrapper(body: Body) {
+    def text: String = convertCommentBody(body)
+  }
+
+  case class ParamWrapper(originalName: String, body: Body) {
+    def name: String = convertSpecialChars(originalName)
+    def comment: String = convertCommentBody(body)
+    def summary: String = body.summary.map(convertInline).getOrElse("")
   }
 
   def convertSummary(co: Option[Comment]): String =
     (for (c <- co; sum <- c.body.summary) yield convertInline(sum)).getOrElse("")
 
   def convertComment(c: Option[Comment]): String =
-    c.map(_.body.blocks.map(convertBlock).mkString).getOrElse("")
+    c.map(x => convertCommentBody(x.body)).getOrElse("")
+
+  def convertCommentBody(b: Body): String =
+    b.blocks.map(convertBlock).mkString
 
   def convertInline(i: Inline): String = i match {
     case c: Chain => c.items.map(convertInline).mkString("")
