@@ -93,7 +93,7 @@ ${entity.comment()}
 			
 			<#list entity.examples() as example>
 \begin{lstlisting}
-${example.text()}
+${example.code()}
 \end{lstlisting}
 			</#list>
 		</#if>
@@ -129,7 +129,7 @@ ${example.text()}
 			
 			<#list method.examples() as example>
 \begin{lstlisting}
-${example.text()}
+${example.inlineCode()}
 \end{lstlisting}			
 			</#list>
 		</#if>		

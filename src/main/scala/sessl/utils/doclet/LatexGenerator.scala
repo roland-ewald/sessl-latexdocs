@@ -56,6 +56,7 @@ import java.io.PrintWriter
 import scala.tools.nsc.doc.model.Def
 import LatexStringConverter.convertSpecialChars
 import LatexStringConverter.camelCaseHyphenation
+import LatexStringConverter.codeToInline
 import scala.tools.nsc.doc.base.comment.Body
 
 /**
@@ -109,7 +110,8 @@ class LatexGenerator extends FreemarkerGenerator {
   }
 
   case class ExampleWrapper(body: Body) {
-    def text: String = (body.blocks collect { case c: Code => c } map convertBlock).mkString
+    def code: String = (body.blocks collect { case c: Code => c } map convertBlock).mkString
+    def inlineCode: String = codeToInline(code)
   }
 
   case class ParamWrapper(originalName: String, body: Body) {
@@ -137,7 +139,7 @@ class LatexGenerator extends FreemarkerGenerator {
     case s: Subscript => s"\\textsubscript{${convertInline(s.text)}}"
     case l: Link => s"\\href{${l.target}}{${convertInline(l.title)}}"
     case m: Monospace => s"\\texttt{${convertInline(m.text)}}"
-    case el: EntityLink => s"\\url{${convertInline(el.title)}}" //TODO: use references
+    case el: EntityLink => handleEntityLink(el)
     case html: HtmlTag =>
       logger.warn("Ignoring HTML tag '" + html + "'"); ""
     case sum: Summary => convertInline(sum.text)
@@ -158,6 +160,10 @@ class LatexGenerator extends FreemarkerGenerator {
     case 1 => "\\subsection"
     case 2 => "\\subsubsection"
     case _ => "\\paragraph"
+  }
+
+  def handleEntityLink(el: EntityLink): String = {
+    s"\\ref{scaladoc:${el.title}}" //TODO: handle references
   }
 
   /** Override this to convert special chars etc. */

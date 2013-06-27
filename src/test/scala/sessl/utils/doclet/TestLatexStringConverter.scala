@@ -51,5 +51,30 @@ class TestLatexStringConverter extends FunSpec {
       }
     }
 
+    describe("code inliner") {
+
+      it("works with empty/normal input") {
+        val simpleDef = "def f(x: Int): Int = x"
+        assert(codeToInline(simpleDef) === newlineCharCodeInline + simpleDef)
+        assert(codeToInline("") === newlineCharCodeInline)
+      }
+
+      it("it prefixes special chars with a '\\'") {
+        assert(codeToInline("""{}\%""") === newlineCharCodeInline + """\{\}\\\%""")
+      }
+
+      it("converts double spaces to '\\ \\ '") {
+        assert(codeToInline("here are  spaces") === newlineCharCodeInline + """here are\ \ spaces""")
+      }
+
+      it("it converts leading spaces to '\\ '") {
+        assert(codeToInline(" so") === newlineCharCodeInline + """\ so""")
+      }
+
+      it("it appends '^^J' to lines (and at the beginning)") {
+        assert(codeToInline("a\nb") === newlineCharCodeInline + "a^^J\nb")
+      }
+    }
+
   }
 }

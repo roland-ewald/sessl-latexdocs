@@ -39,19 +39,20 @@ object LatexStringConverter {
   /** Character replacement map. */
   val charReplacements = (escapeSymbols.map(x => (x, x)).toMap ++ replaceSymbols).map(x => (x._1, """\\\""" + x._2))
 
-  /** The regular expression for character conversion. */
-  val specialCharConversion = ("[" + (escapeSymbols ++ replaceSymbols.keys) + "]").r
-
   /** The regular expression for CamelCase words.*/
   val camelCase = """([a-z])([A-Z])""".r
+
+  /** To be used for '\n' in in-line code. */
+  val newlineCharCodeInline = "^^J"
+
+  /** To be prefixed with a '\' in in-line code. */
+  val inlineCodeReplaceChars = Set("""\\""", "{", "}", "%")
 
   /**
    * Converts string to LaTeX-friendly string (special characters are escaped etc.).
    *  @param s string the string to be converted
    */
-  def convertSpecialChars(s: String): String = specialCharConversion.replaceAllIn(s, {
-    m => charReplacements.getOrElse(m.group(0), m.group(0))
-  })
+  def convertSpecialChars(s: String): String = convertChars(escapeSymbols ++ replaceSymbols.keys, charReplacements)(s)
 
   /**
    * Adds Latex markers for hyphenation ('\-').
@@ -59,6 +60,18 @@ object LatexStringConverter {
    */
   def camelCaseHyphenation(s: String): String = camelCase.replaceAllIn(s, {
     m => m.group(1) + """\\-""" + m.group(2)
+  })
+
+  def codeToInline(s: String): String = {
+    val charsConverted = convertChars(inlineCodeReplaceChars, inlineCodeReplaceChars.map(x => (x, """\\\""" + x)).toMap + ("""\""" -> """\\\\"""))(s)
+    println(s"""'${charsConverted}'""")
+    val doubleSpacesEscaped = charsConverted.replaceAll("""\s\s""", """\\ \\ """)
+    val firstLineSpacesEscaped = doubleSpacesEscaped.replaceAll("""^\s""", """\\ """)
+    newlineCharCodeInline + firstLineSpacesEscaped.replaceAll("\n", newlineCharCodeInline + "\n")
+  }
+
+  def convertChars(charsToMatch: Set[String], replacements: Map[String, String])(s: String): String = ("[" + charsToMatch + "]").r.replaceAllIn(s, {
+    m => replacements.getOrElse(m.group(0), m.group(0))
   })
 
 }
