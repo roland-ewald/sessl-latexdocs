@@ -2,12 +2,55 @@
 \documentclass{article}
 
 \usepackage[colorlinks=true]{hyperref}
+\usepackage{color}
 \usepackage{listings}
 \usepackage{tabularx}
 \usepackage{fixltx2e}
 \usepackage[a4paper]{geometry}
 \usepackage[utf8]{inputenc}
 \lstset{breaklines=true, stringstyle=\ttfamily,basicstyle=\tiny,language=,}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\setlength{\parindent}{0cm}
+
+% Scala settings (from: http://tihlde.org/~eivindw/latex-listings-for-scala/)
+\lstdefinelanguage{scala}{
+  morekeywords={abstract,case,catch,class,def,%
+    do,else,extends,false,final,finally,%
+    for,if,implicit,import,match,mixin,%
+    new,null,object,override,package,%
+    private,protected,requires,return,sealed,%
+    super,this,throw,trait,true,try,%
+    type,val,var,while,with,yield},%,and,orand/or are sessl-specific
+  otherkeywords={=,=>,<-,<\%,<:,>:,\#,@},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[n]{/*}{*/},
+  morestring=[b]",
+  morestring=[b]',
+  morestring=[b]""",
+  mathescape=true
+}
+% Default settings for code listings
+\lstset{frame=tb,
+  language=scala,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  frame=single,
+  breaklines=true,
+  breakatwhitespace=true
+  tabsize=2
+}
+
 
 
 \title{Scaladocs}
@@ -27,7 +70,7 @@ ${entity.comment()}
 
 
 		<#if entity.hasValueParams()>
-			Parameters:
+			\paragraph{Parameters}
 			\begin{itemize}
 			<#list entity.valueParams() as param>
 			 \item \textbf{${param.name()}} : ${param.summary()} 
@@ -36,7 +79,7 @@ ${entity.comment()}
 		</#if>
 		
 		<#if entity.hasTypeParams()>
-			Type Parameters:
+			\paragraph{Type Parameters}
 			\begin{itemize}
 			<#list entity.typeParams() as param>
 			 \item \textbf{${param.name()}} : ${param.summary()} 
@@ -45,10 +88,13 @@ ${entity.comment()}
 		</#if>
 		
 		<#if entity.hasExamples()>
-			Example usage:
+		
+			\textbf{Usage}
+			
 			<#list entity.examples() as example>
-			${example.text()}  
-						
+\begin{lstlisting}
+${example.text()}
+\end{lstlisting}
 			</#list>
 		</#if>
 
@@ -79,10 +125,12 @@ ${entity.comment()}
 		</#if>
 		
 		<#if method.hasExamples()>
-			Example usage:
-			<#list method.examples() as example>
-			${example.text()}  
+			\textbf{Usage}
 			
+			<#list method.examples() as example>
+\begin{lstlisting}
+${example.text()}
+\end{lstlisting}			
 			</#list>
 		</#if>		
 	\\\hline

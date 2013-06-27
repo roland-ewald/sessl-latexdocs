@@ -109,7 +109,7 @@ class LatexGenerator extends FreemarkerGenerator {
   }
 
   case class ExampleWrapper(body: Body) {
-    def text: String = convertCommentBody(body)
+    def text: String = (body.blocks collect { case c: Code => c } map convertBlock).mkString
   }
 
   case class ParamWrapper(originalName: String, body: Body) {
@@ -145,8 +145,8 @@ class LatexGenerator extends FreemarkerGenerator {
 
   def convertBlock(b: Block): String = b match {
     case t: Title => sectionByLevel(t.level) + "{" + convertInline(t.text) + "}\n\n"
-    case p: Paragraph => "\n\n" + convertInline(p.text) + "\n\n"
-    case c: Code => env("verbatim", c.data) //TODO: use lstlistings
+    case p: Paragraph => "\n" + convertInline(p.text) + "\n"
+    case c: Code => handleCodeSample(c.data)
     case ul: UnorderedList => env("itemize", ul.items.map(convertBlock).map(item).mkString)
     case ol: OrderedList => env("enumerate", ol.items.map(convertBlock).map(item).mkString)
     case dl: DefinitionList => env("itemize", dl.items.map(x =>
@@ -159,6 +159,9 @@ class LatexGenerator extends FreemarkerGenerator {
     case 2 => "\\subsubsection"
     case _ => "\\paragraph"
   }
+
+  /** Override this to convert special chars etc. */
+  def handleCodeSample(d: String) = d
 
   def env(name: String, content: String) = s"\\begin{${name}}\n${content}\n\\end{${name}}\n"
 
