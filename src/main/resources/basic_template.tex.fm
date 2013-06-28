@@ -105,7 +105,7 @@ ${example.code()}
 	\begin{tabularx}{\textwidth}{ |>{\hsize=.6\hsize}X|>{\hsize=1.4\hsize}X| }
     \hline \textbf{Name} & \textbf{Description} \\\hline
 	<#list entity.methods() as method>
-	${method.name()} & ${method.comment()} 	
+	${method.name()} \phantomsection \label{scaladoc:${method.labelName()}} & ${method.comment()} 	
 		<#if method.hasValueParams()>
 			Parameters:
 			\begin{itemize}

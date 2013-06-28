@@ -57,7 +57,12 @@ import scala.tools.nsc.doc.model.Def
 import LatexStringConverter.convertSpecialChars
 import LatexStringConverter.camelCaseHyphenation
 import LatexStringConverter.codeToInline
+import LatexStringConverter.produceValidLabel
 import scala.tools.nsc.doc.base.comment.Body
+import scala.tools.nsc.doc.base.LinkToMember
+import scala.tools.nsc.doc.base.Tooltip
+import scala.tools.nsc.doc.base.LinkToExternal
+import scala.tools.nsc.doc.base.LinkToTpl
 
 /**
  * A simple Scaladoc generator for LaTeX.
@@ -107,6 +112,8 @@ class LatexGenerator extends FreemarkerGenerator {
   case class DefWrapper(d: Def) extends CommentedEntity {
     def comm = d.comment
     def name: String = camelCaseHyphenation(convertSpecialChars(d.name))
+    def qualifiedName = d.qualifiedName
+    def labelName = produceValidLabel(d.qualifiedName)
   }
 
   case class ExampleWrapper(body: Body) {
@@ -130,28 +137,28 @@ class LatexGenerator extends FreemarkerGenerator {
     b.blocks.map(convertBlock).mkString
 
   def convertInline(i: Inline): String = i match {
-    case c: Chain => c.items.map(convertInline).mkString("")
-    case t: Text => convertSpecialChars(t.text)
-    case u: Underline => s"\\underline{${convertInline(u.text)}}"
-    case b: Bold => s"\\textbf{${convertInline(b.text)}}"
-    case i: Italic => s"\\emph{${convertInline(i.text)}}"
-    case s: Superscript => s"\\textsuperscript{${convertInline(s.text)}}"
-    case s: Subscript => s"\\textsubscript{${convertInline(s.text)}}"
-    case l: Link => s"\\href{${l.target}}{${convertInline(l.title)}}"
-    case m: Monospace => s"\\texttt{${convertInline(m.text)}}"
+    case Chain(items) => items.map(convertInline).mkString("")
+    case Summary(text) => convertInline(text)
+    case Text(text) => convertSpecialChars(text)
+    case Underline(text) => s"\\underline{${convertInline(text)}}"
+    case Bold(text) => s"\\textbf{${convertInline(text)}}"
+    case Italic(text) => s"\\emph{${convertInline(text)}}"
+    case Superscript(text) => s"\\textsuperscript{${convertInline(text)}}"
+    case Subscript(text) => s"\\textsubscript{${convertInline(text)}}"
+    case Link(target, title) => handleExternalLink(target, convertInline(title))
+    case Monospace(text) => s"\\texttt{${convertInline(text)}}"
     case el: EntityLink => handleEntityLink(el)
     case html: HtmlTag =>
       logger.warn("Ignoring HTML tag '" + html + "'"); ""
-    case sum: Summary => convertInline(sum.text)
   }
 
   def convertBlock(b: Block): String = b match {
-    case t: Title => sectionByLevel(t.level) + "{" + convertInline(t.text) + "}\n\n"
-    case p: Paragraph => "\n" + convertInline(p.text) + "\n"
-    case c: Code => handleCodeSample(c.data)
-    case ul: UnorderedList => env("itemize", ul.items.map(convertBlock).map(item).mkString)
-    case ol: OrderedList => env("enumerate", ol.items.map(convertBlock).map(item).mkString)
-    case dl: DefinitionList => env("itemize", dl.items.map(x =>
+    case Title(text, level) => sectionByLevel(level) + "{" + convertInline(text) + "}\n\n"
+    case Paragraph(text) => "\n" + convertInline(text) + "\n"
+    case Code(data) => handleCodeSample(data)
+    case UnorderedList(items) => env("itemize", items.map(convertBlock).map(item).mkString)
+    case OrderedList(items, style) => env("enumerate", items.map(convertBlock).map(item).mkString)
+    case DefinitionList(items) => env("itemize", items.map(x =>
       "\\textbf{" + convertInline(x._1) + "}:" + convertBlock(x._2)).map(item).mkString)
     case h: HorizontalRule => "\n\\hline\n"
   }
@@ -162,9 +169,16 @@ class LatexGenerator extends FreemarkerGenerator {
     case _ => "\\paragraph"
   }
 
-  def handleEntityLink(el: EntityLink): String = {
-    s"\\ref{scaladoc:${el.title}}" //TODO: handle references
+  def handleEntityLink(el: EntityLink): String = el.link match {
+    case LinkToMember(mem, tpl) => ref(mem.toString)
+    case LinkToTpl(tpl) => s"""\\hyperref[scaladoc:${tpl}]{${convertInline(el.title)}}"""
+    case LinkToExternal(name, url) => handleExternalLink(url, name)
+    case Tooltip(name) => name
   }
+
+  def ref(qualName: String) = s"""\\hyperref[scaladoc:${produceValidLabel(qualName)}]{${convertSpecialChars(qualName)}}"""
+
+  def handleExternalLink(url: String, title: String) = s"\\href{${url}}{${title}}"
 
   /** Override this to convert special chars etc. */
   def handleCodeSample(d: String) = d

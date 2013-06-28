@@ -76,5 +76,9 @@ class TestLatexStringConverter extends FunSpec {
       }
     }
 
+    it("produces valid labels") {
+      assert(produceValidLabel("a%#f") === "a::f")
+    }
+
   }
 }

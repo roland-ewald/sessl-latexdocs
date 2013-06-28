@@ -18,8 +18,8 @@
 package sessl.utils.doclet
 
 /**
- * This is a __summary__ for [[SampleClass2]].
- *
+ * This is a __summary__ for [[SampleClass2#f]].
+ * 
  * =Documentation=
  *
  * Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut
@@ -31,12 +31,19 @@ package sessl.utils.doclet
  *  //...
  *  val x = 1 + 1
  *  //...}}}
- *
+ * 
  */
 class SampleClass2 {
 
   /**
    * This should be the '''summary'''.
+   *
+   *  @example {{{
+   *  //...
+   *  f(1)
+   *  f(2)
+   *  //...}}}
+   *
    * @param x this explains a parameter
    */
   def f(x: Int) = x

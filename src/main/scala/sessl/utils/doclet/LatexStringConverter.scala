@@ -64,7 +64,6 @@ object LatexStringConverter {
 
   def codeToInline(s: String): String = {
     val charsConverted = convertChars(inlineCodeReplaceChars, inlineCodeReplaceChars.map(x => (x, """\\\""" + x)).toMap + ("""\""" -> """\\\\"""))(s)
-    println(s"""'${charsConverted}'""")
     val doubleSpacesEscaped = charsConverted.replaceAll("""\s\s""", """\\ \\ """)
     val firstLineSpacesEscaped = doubleSpacesEscaped.replaceAll("""^\s""", """\\ """)
     newlineCharCodeInline + firstLineSpacesEscaped.replaceAll("\n", newlineCharCodeInline + "\n")
@@ -73,5 +72,13 @@ object LatexStringConverter {
   def convertChars(charsToMatch: Set[String], replacements: Map[String, String])(s: String): String = ("[" + charsToMatch + "]").r.replaceAllIn(s, {
     m => replacements.getOrElse(m.group(0), m.group(0))
   })
+
+  /**
+   * @see [[http://tex.stackexchange.com/a/18312/2569 Latex chars that can be used in labels]]
+   */
+  def produceValidLabel(s: String): String = {
+    val charsToReplace = inlineCodeReplaceChars + "~" + "#"
+    convertChars(charsToReplace, charsToReplace.map(x => (x, ":")).toMap + ("""\""" -> ":"))(s)
+  }
 
 }
