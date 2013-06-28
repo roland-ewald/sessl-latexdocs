@@ -59,7 +59,7 @@ class TestLatexStringConverter extends FunSpec {
         assert(codeToInline("") === newlineCharCodeInline)
       }
 
-      it("it prefixes special chars with a '\\'") {
+      it("prefixes special chars with a '\\'") {
         assert(codeToInline("""{}\%""") === newlineCharCodeInline + """\{\}\\\%""")
       }
 
@@ -67,11 +67,11 @@ class TestLatexStringConverter extends FunSpec {
         assert(codeToInline("here are  spaces") === newlineCharCodeInline + """here are\ \ spaces""")
       }
 
-      it("it converts leading spaces to '\\ '") {
+      it("converts leading spaces to '\\ '") {
         assert(codeToInline(" so") === newlineCharCodeInline + """\ so""")
       }
 
-      it("it appends '^^J' to lines (and at the beginning)") {
+      it("appends '^^J' to lines (and at the beginning)") {
         assert(codeToInline("a\nb") === newlineCharCodeInline + "a^^J\nb")
       }
     }
