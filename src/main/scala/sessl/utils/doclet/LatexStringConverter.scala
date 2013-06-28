@@ -34,7 +34,7 @@ object LatexStringConverter {
     """\\""" -> "workaround, see key '\\' below", // '\' is used as escape character in regular expressions as well :)
     "\\" -> "textbackslash",
     "§" -> "S").map(
-      x => (x._1, x._2 + " ")) //This avoids: <T> => \textlessT(<-undefined control sequene)
+      x => (x._1, x._2 + " ")) //This avoids: <T> => \textlessT(<-undefined control sequence)
 
   /** Character replacement map. */
   val charReplacements = (escapeSymbols.map(x => (x, x)).toMap ++ replaceSymbols).map(x => (x._1, """\\\""" + x._2))
@@ -52,7 +52,7 @@ object LatexStringConverter {
    * Converts string to LaTeX-friendly string (special characters are escaped etc.).
    *  @param s string the string to be converted
    */
-  def convertSpecialChars(s: String): String = convertChars(escapeSymbols ++ replaceSymbols.keys, charReplacements)(s)
+  def convertSpecialChars(s: String): String = convertChars(charReplacements)(s)
 
   /**
    * Adds Latex markers for hyphenation ('\-').
@@ -62,23 +62,38 @@ object LatexStringConverter {
     m => m.group(1) + """\\-""" + m.group(2)
   })
 
+  /**
+   * Converts code so that it can be in-lined.
+   * @see sec. 5.1. of the [[ftp://ftp.tex.ac.uk/tex-archive/macros/latex/contrib/listings/listings.pdf lstlistings manual]] ("Listings inside arguments")
+   * @param s code to be converted
+   */
   def codeToInline(s: String): String = {
-    val charsConverted = convertChars(inlineCodeReplaceChars, inlineCodeReplaceChars.map(x => (x, """\\\""" + x)).toMap + ("""\""" -> """\\\\"""))(s)
+    val charsConverted = convertChars(inlineCodeReplaceChars.map(x => (x, """\\\""" + x)).toMap + ("""\""" -> """\\\\"""))(s)
     val doubleSpacesEscaped = charsConverted.replaceAll("""\s\s""", """\\ \\ """)
     val firstLineSpacesEscaped = doubleSpacesEscaped.replaceAll("""^\s""", """\\ """)
     newlineCharCodeInline + firstLineSpacesEscaped.replaceAll("\n", newlineCharCodeInline + "\n")
   }
 
-  def convertChars(charsToMatch: Set[String], replacements: Map[String, String])(s: String): String = ("[" + charsToMatch + "]").r.replaceAllIn(s, {
-    m => replacements.getOrElse(m.group(0), m.group(0))
-  })
+  /**
+   * Maps a set of characters to other characters in a given string.
+   * @param replacements the conversion map
+   * @param s the string to be converted
+   */
+  def convertChars(replacements: Map[String, String])(s: String): String = {
+    val regex = ("[" + (replacements.keySet - """\""").mkString + "]").r //'\' must not be included, as it will escape the next special character
+    regex.replaceAllIn(s, {
+      m => replacements.getOrElse(m.group(0), m.group(0))
+    })
+  }
 
   /**
+   * Produce label that only contains allowed characters (all others are replaced by ':').
    * @see [[http://tex.stackexchange.com/a/18312/2569 Latex chars that can be used in labels]]
+   * @param s label name
    */
   def produceValidLabel(s: String): String = {
     val charsToReplace = inlineCodeReplaceChars + "~" + "#"
-    convertChars(charsToReplace, charsToReplace.map(x => (x, ":")).toMap + ("""\""" -> ":"))(s)
+    convertChars(charsToReplace.map(x => (x, ":")).toMap + ("""\""" -> ":"))(s)
   }
 
 }
