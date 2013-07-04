@@ -32,24 +32,36 @@ import freemarker.template.DefaultObjectWrapper
 import scala.tools.nsc.doc.base.comment.Comment
 
 /**
+ * This is a [[Generator]] that writes the documentation to a single [[http://freemarker.org Freemarker]] template.
+ *
+ * Template file and target file can be configured with the properties `sessl.utils.doclet.template` and `sessl.utils.doclet.target`, respectively.
+ *
  * @author Roland Ewald
  */
 abstract class FreemarkerGenerator extends Generator with Universer with Indexer with Logging {
 
+  /** The default template. */
   def defaultTemplateFile: String
 
+  /** The default name of the file to produce. */
   def defaultTargetFile: String
 
+  /** Create a wrapper for a [[DocTemplateEntity]]. */
   def wrap(d: DocTemplateEntity): Any
 
+  /** Filter which [[DocTemplateEntity]] to consider. */
   def filter(d: DocTemplateEntity): Boolean = d.isType
 
+  /** The directory root from which to retrieve the template file. */
   def templateDirectory = "/"
 
+  /** The template file. */
   def templateFile = sys.props.getOrElse("sessl.utils.doclet.template", defaultTemplateFile)
 
+  /** The target file. */
   def targetFile = sys.props.getOrElse("sessl.utils.doclet.target", defaultTargetFile)
 
+  /** The target directory. */
   def targetDir = new File(universe.settings.outdir.value)
 
   override def generateImpl(): Unit = {
