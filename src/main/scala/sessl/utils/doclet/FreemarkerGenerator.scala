@@ -18,18 +18,20 @@
 package sessl.utils.doclet
 
 import java.io.File
+import java.io.FileWriter
+import java.util.Date
+
 import scala.tools.nsc.doc.doclet.Generator
 import scala.tools.nsc.doc.doclet.Indexer
 import scala.tools.nsc.doc.doclet.Universer
 import scala.tools.nsc.doc.model.DocTemplateEntity
+
 import com.weiglewilczek.slf4s.Logging
-import java.io.FileWriter
-import freemarker.template.TemplateException
+
 import freemarker.template.Configuration
-import java.util.Date
-import freemarker.template.Template
 import freemarker.template.DefaultObjectWrapper
-import scala.tools.nsc.doc.base.comment.Comment
+import freemarker.template.Template
+import freemarker.template.TemplateException
 
 /**
  * This is a [[Generator]] that writes the documentation to a single [[http://freemarker.org Freemarker]] template.
@@ -40,13 +42,19 @@ import scala.tools.nsc.doc.base.comment.Comment
  */
 abstract class FreemarkerGenerator extends Generator with Universer with Indexer with Logging {
 
+  import FreemarkerGenerator._
+  
   /** The default template. */
   def defaultTemplateFile: String
 
   /** The default name of the file to produce. */
   def defaultTargetFile: String
 
-  /** Create a wrapper for a [[DocTemplateEntity]]. */
+  /**
+   * Create a wrapper for a [[DocTemplateEntity]].
+   *  @param d the documented entity
+   *  @return a wrapper to generate documentation for this entity, to be called from the freemarker template
+   */
   def wrap(d: DocTemplateEntity): Any
 
   /** Filter which [[DocTemplateEntity]] to consider. */
@@ -91,6 +99,20 @@ abstract class FreemarkerGenerator extends Generator with Universer with Indexer
     }
   }
 
+  def configureTemplate(): Template = {
+    val cfg = new Configuration
+    cfg.setClassForTemplateLoading(classOf[LatexGenerator], templateDirectory)
+    cfg.setObjectWrapper(new DefaultObjectWrapper())
+    println(templateFile)
+    cfg.getTemplate(templateFile)
+  }
+}
+
+/**
+ * Auxiliary methods.
+ */
+object FreemarkerGenerator {
+
   /**
    * Walk through the entity tree and retrieve entities to be documented.
    *  @param dte the entity
@@ -105,14 +127,6 @@ abstract class FreemarkerGenerator extends Generator with Universer with Indexer
       childElements
   }
 
-  def configureTemplate(): Template = {
-    val cfg = new Configuration
-    cfg.setClassForTemplateLoading(classOf[LatexGenerator], templateDirectory)
-    cfg.setObjectWrapper(new DefaultObjectWrapper())
-    println(templateFile)
-    cfg.getTemplate(templateFile)
-  }
-
   def toJavaMap[A, B](m: Map[A, B]): java.util.HashMap[A, B] = {
     val rt = new java.util.HashMap[A, B]()
     for ((k, v) <- m) rt.put(k, v)
@@ -124,4 +138,5 @@ abstract class FreemarkerGenerator extends Generator with Universer with Indexer
     for (x <- xs) rt.add(x)
     rt
   }
+
 }
