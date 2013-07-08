@@ -53,6 +53,8 @@ import LatexStringConverter.produceValidLabel
 /**
  * Auxiliary methods for Latex code generation, used by [[TypeOrPackageWrapper]] and other wrappers.
  *
+ * Most methods simply pattern match on elements provided by [[scala.tools.nsc.doc.base.comment.Comment]].
+ *
  * @see [[CommentedEntity]]
  *
  * @author Roland Ewald
@@ -70,9 +72,9 @@ object LatexConverter extends Logging {
     b.blocks.map(convertBlock).mkString
 
   def convertBlock(b: Block): String = b match {
-    case Title(text, level) => sectionByLevel(level) + "{" + convertInline(text) + "}\n\n"
+    case t: Title => convertTitle(t)
     case Paragraph(text) => "\n" + convertInline(text) + "\n"
-    case Code(data) => handleCodeSample(data)
+    case Code(data) => data
     case UnorderedList(items) => env("itemize", items.map(convertBlock).map(item).mkString)
     case OrderedList(items, style) => env("enumerate", items.map(convertBlock).map(item).mkString)
     case DefinitionList(items) => env("itemize", items.map(x =>
@@ -91,34 +93,28 @@ object LatexConverter extends Logging {
     case Subscript(text) => s"\\textsubscript{${convertInline(text)}}"
     case Link(target, title) => handleExternalLink(target, convertInline(title))
     case Monospace(text) => s"\\texttt{${convertInline(text)}}"
-    case el: EntityLink => handleEntityLink(el)
+    case el: EntityLink => convertEntityLink(el)
     case html: HtmlTag =>
       logger.warn("Ignoring HTML tag '" + html + "'"); ""
   }
 
-  def handleEntityLink(el: EntityLink): String = el.link match {
-    case LinkToMember(mem, tpl) => ref(mem.toString)
+  def convertEntityLink(el: EntityLink): String = el.link match {
+    case LinkToMember(mem, tpl) => handleReference(mem.toString)
     case LinkToTpl(tpl) => s"""\\hyperref[scaladoc:${tpl}]{${convertInline(el.title)}}"""
     case LinkToExternal(name, url) => handleExternalLink(url, name)
     case Tooltip(name) => name
   }
 
-  /**
-   * Generate appropriate section by level.
-   * @param i the level (can't be < 1 apparently)
-   * @return appropriate Latex command
-   */
-  def sectionByLevel(i: Int): String = i match {
-    case 1 => "\\subsection"
-    case 2 => "\\subsubsection"
-    case _ => "\\paragraph"
+  def convertTitle(t: Title): String = {
+    val sectionType = t.level match { // can't be < 1 apparently
+      case 1 => "\\subsection"
+      case 2 => "\\subsubsection"
+      case _ => "\\paragraph"
+    }
+    sectionType + "{" + convertInline(t.text) + "}\n\n"
   }
 
-  /** Create reference to some entity. */
-  def ref(qualName: String) = s"""\\hyperref[scaladoc:${produceValidLabel(qualName)}]{${convertSpecialChars(qualName)}}"""
-
-  /** Override this to convert code samples in any special way. */
-  def handleCodeSample(d: String) = d
+  def handleReference(qualName: String) = s"""\\hyperref[scaladoc:${produceValidLabel(qualName)}]{${convertSpecialChars(qualName)}}"""
 
   def handleExternalLink(url: String, title: String) = s"\\href{${url}}{${title}}"
 

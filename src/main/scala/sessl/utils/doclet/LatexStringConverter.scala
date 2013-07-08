@@ -52,15 +52,17 @@ object LatexStringConverter {
    * Converts string to LaTeX-friendly string (special characters are escaped etc.).
    *  @param s string the string to be converted
    */
-  def convertSpecialChars(s: String): String = convertChars(charReplacements)(s)
+  def convertSpecialChars(s: String) = convertChars(charReplacements)(s)
 
   /**
    * Adds Latex markers for hyphenation ('\-').
    *  @param s method or class name
    */
-  def camelCaseHyphenation(s: String): String = camelCase.replaceAllIn(s, {
-    m => m.group(1) + """\\-""" + m.group(2)
-  })
+  def camelCaseHyphenation(s: String): String = {
+    camelCase.replaceAllIn(s, {
+      m => m.group(1) + """\\-""" + m.group(2)
+    })
+  }
 
   /**
    * Converts code so that it can be in-lined.
