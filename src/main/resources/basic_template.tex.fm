@@ -4,7 +4,7 @@
 \usepackage[colorlinks=true]{hyperref}
 \usepackage{color}
 \usepackage{listings}
-\usepackage{tabularx}
+\usepackage{longtable}
 \usepackage{fixltx2e}
 \usepackage[a4paper]{geometry}
 \usepackage[utf8]{inputenc}
@@ -102,7 +102,7 @@ ${example.code()}
 \subsection{Methods}
 \label{scaladoc:${entity.doc().qualifiedName()}:methods}
 
-	\begin{tabularx}{\textwidth}{ |>{\hsize=.6\hsize}X|>{\hsize=1.4\hsize}X| }
+	\begin{longtable}{|l|p{10cm}|}
     \hline \textbf{Name} & \textbf{Description} \\\hline
 	<#list entity.methods() as method>
 	${method.name()} \phantomsection \label{scaladoc:${method.labelName()}} & ${method.comment()} 	
@@ -129,13 +129,13 @@ ${example.code()}
 			
 			<#list method.examples() as example>
 \begin{lstlisting}
-${example.inlineCode()}
+${example.code()}
 \end{lstlisting}			
 			</#list>
 		</#if>		
 	\\\hline
 	</#list>
-	\end{tabularx}
+	\end{longtable}
 </#list>
 
 \end{document}

@@ -58,7 +58,7 @@ abstract class FreemarkerGenerator extends Generator with Universer with Indexer
   def wrap(d: DocTemplateEntity): Any
 
   /** Filter which [[DocTemplateEntity]] to consider. */
-  def filter(d: DocTemplateEntity): Boolean = d.isType
+  def filter(d: DocTemplateEntity): Boolean = true
 
   /** The directory root from which to retrieve the template file. */
   def templateDirectory = "/"
