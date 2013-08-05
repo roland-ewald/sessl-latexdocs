@@ -45,7 +45,7 @@
 
 		<!-- SLF4J for Scala -->
 		<dependency>
-			<groupId>com.weiglewilczek</groupId>
+			<groupId>com.weiglewilczek.slf4s</groupId>
 			<artifactId>slf4s_2.10</artifactId>
 			<version>1.0.7</version>
 		</dependency>
