@@ -9,7 +9,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<scala.version>2.10.1</scala.version>
+		<scala.version>2.10.2</scala.version>
 	</properties>
 
 	<!-- Use Maven repository for Scala tools -->
@@ -48,6 +48,11 @@
 			<groupId>com.weiglewilczek.slf4s</groupId>
 			<artifactId>slf4s_2.10</artifactId>
 			<version>1.0.7</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.6.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
