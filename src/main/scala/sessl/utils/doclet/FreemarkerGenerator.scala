@@ -26,7 +26,7 @@ import scala.tools.nsc.doc.doclet.Indexer
 import scala.tools.nsc.doc.doclet.Universer
 import scala.tools.nsc.doc.model.DocTemplateEntity
 
-import com.weiglewilczek.slf4s.Logging
+import com.typesafe.scalalogging.slf4j.Logging
 
 import freemarker.template.Configuration
 import freemarker.template.DefaultObjectWrapper

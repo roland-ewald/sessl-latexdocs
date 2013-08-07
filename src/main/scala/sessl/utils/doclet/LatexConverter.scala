@@ -45,7 +45,7 @@ import scala.tools.nsc.doc.base.comment.Title
 import scala.tools.nsc.doc.base.comment.Underline
 import scala.tools.nsc.doc.base.comment.UnorderedList
 
-import com.weiglewilczek.slf4s.Logging
+import com.typesafe.scalalogging.slf4j.Logging
 
 import LatexStringConverter.convertSpecialChars
 import LatexStringConverter.produceValidLabel
