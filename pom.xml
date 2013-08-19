@@ -4,7 +4,7 @@
 	<groupId>org.sessl.utils</groupId>
 	<artifactId>latexdocs</artifactId>
 	<packaging>jar</packaging>
-	<version>0.1-SNAPSHOT</version>
+	<version>0.1</version>
 	<name>SESSL utilities: LaTeX support for Scaladoc</name>
 
 	<properties>

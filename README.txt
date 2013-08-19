@@ -2,16 +2,28 @@ SESSL utilities: Scaladocs Generator for LaTeX
 ==============================================
 
 Tested with: 
-- Scala 2.10 (http://scala-lang.org)
+- Scala 2.10.2 (http://scala-lang.org)
 - Maven 3 (http://maven.apache.org)
 - MikTeX 2.9 (http://miktex.org/)
 
-Compile with: mvn test-compile
+How to Use
+==========
 
-Usage: 
+After compilation with "mvn test-compile", execute from command line:
 
-execute scala.tools.nsc.ScalaDoc with -d someFolder -doc-generator sessl.utils.doclet.LatexGenerator src/test/scala/sessl/utils/doclet/SampleClass.scala
+scala -classpath "[CLASSPATH]" scala.tools.nsc.ScalaDoc -d someFolder -doc-generator sessl.utils.doclet.LatexGenerator path/to/File1.scala path/to/File2.scala ...
 
-Make sure the scala compiler jar is on the classpath.
+You can create your local CLASSPATH with "mvn dependency:build-classpath" (there are probably nicer ways to execute this).
+
+Make sure the Scala compiler jar is also on the classpath, and that 'someFolder' already exists.
 
 License: Apache 2.0
+
+How to Change
+=============
+
+The LaTeX file is generated with Freemarker (http://freemarker.org), from the default template at src/main/resources/basic_template.tex.fm.
+
+You can use your own template by setting the property sessl.utils.doclet.template.
+
+Most of the Latex generation is handled in src/main/scala/sessl/utils/doclet/LatexConverter.scala.
